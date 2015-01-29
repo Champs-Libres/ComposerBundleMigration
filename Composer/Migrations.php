@@ -40,7 +40,7 @@ class Migrations
      * to the root bundle
      * 
      * The destination migration dir may be configured in root package with 
-     * `appMigrationsDir` key. Default to `app/DoctrineMigrations`
+     * `app-migrations-dir` key. Default to `app/DoctrineMigrations`
      * 
      * The migrations files are searched in __bundle_path__/Resources/migrations 
      * OR in the path defined by the 'migration-source' directory in the extra 
@@ -149,8 +149,8 @@ class Migrations
     {
         $extras = $composer->getPackage()->getExtra();
         
-        return (array_key_exists('appMigrationsDir',$extras)) ?
-            $extras['appMigrationsDir'] :
+        return (array_key_exists('app-migrations-dir',$extras)) ?
+            $extras['app-migrations-dir'] :
             getcwd().'/app/DoctrineMigrations';
     }
 }
