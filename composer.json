@@ -20,7 +20,8 @@
         "php": ">5.4"
     },
     "suggests": {
-        "doctrine/doctrine-migrations-bundle": "*"
+        "doctrine/doctrine-migrations-bundle": "*",
+        "doctrine/migrations": "*"
     },
     "autoload": {
         "psr-4": {"ComposerBundleMigration\\" : ""}
