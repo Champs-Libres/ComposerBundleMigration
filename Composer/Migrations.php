@@ -66,11 +66,15 @@ class Migrations
         $areFileMigrated = array();
         
         //migrate for root package
-        $areFileMigrated[] = self::handlePackage($event->getComposer()->getPackage(),
-              $installer, $io, $appMigrationDir);
+        $areFileMigrated[] = self::handlePackage('.', 
+              $event->getComposer()->getPackage(),
+              $io, 
+              $appMigrationDir);
         
         foreach($packages as $package) {
-           $areFileMigrated[] = self::handlePackage($package, $installer, $io, 
+           $areFileMigrated[] = self::handlePackage($installer->getInstallPath($package),
+                 $package,
+                 $io, 
                  $appMigrationDir);
         }
         
@@ -82,14 +86,13 @@ class Migrations
     }
     
     private static function handlePackage(
-          PackageInterface $package, 
-          InstallationManager $installer,
+          $packagePath,
+          PackageInterface $package,
           IOInterface $io,
           $appMigrationDir
           )
     {
          //get path
-            $packagePath = $installer->getInstallPath($package);
             $installSuffix = array_key_exists('migration-source-dir', $package->getExtra()) ? 
                   $package->getExtra()['migration-source-dir'] 
                   : 'Resources/migrations';
@@ -97,6 +100,7 @@ class Migrations
             
             //check for files and copy them
             if (file_exists($migrationDir)) {
+                var_dump(glob($migrationDir));
                 foreach (glob($migrationDir.'/Version*.php') as $fullPath) {
                     if ($io->isVeryVerbose()) {
                         $io->write("<info>Found a candidate migration file at $fullPath</info>");
