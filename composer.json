@@ -19,9 +19,9 @@
     "require": {
         "php": ">5.4"
     },
-    "suggests": {
-        "doctrine/doctrine-migrations-bundle": "*",
-        "doctrine/migrations": "*"
+    "suggest": {
+        "doctrine/doctrine-migrations-bundle": "doctrine migrations for symfony app",
+        "doctrine/migrations": "the original doctrine migration bundle"
     },
     "autoload": {
         "psr-4": {"ComposerBundleMigration\\" : ""}
