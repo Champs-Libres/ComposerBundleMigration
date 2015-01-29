@@ -5,10 +5,25 @@ Migrate Doctrine Migrations files from installed bundles to the root package.
 Installation
 -------------
 
-`composer require champs-libres/composer-bundle-migration`
+In your root package :
 
-Usage in root package
----------------------
+`composer require champs-libres/composer-bundle-migration ~1.0`
+
+Add the post-install-cmd and post-update-cmd in your root composer.json : 
+
+```
+"scripts": {
+        "post-install-cmd": [
+            "ComposerBundleMigration\\Composer\\Migrations::synchronizeMigrations"
+        ],
+        "post-update-cmd": [
+            "ComposerBundleMigration\\Composer\\Migrations::synchronizeMigrations"
+        ]      
+    }
+```
+
+Configure migration directory
+-----------------------------
 
 In your **root package**, you may configure the directory where migrations files 
 are copied.
@@ -23,10 +38,10 @@ In `composer.json`:
 
 Default is `app/DoctrineMigrations` (the default for doctrine-migrations-bundle).
 
-Usage in installed bundles
-----------------------------
+Configure migration source dir
+------------------------------
 
-In the installed bundles, you may also configure the directory where migrations files
+In the installed packages, you may also configure the directory where migrations files
 are located. 
 
 ```
