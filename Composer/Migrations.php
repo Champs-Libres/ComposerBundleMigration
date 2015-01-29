@@ -100,7 +100,6 @@ class Migrations
             
             //check for files and copy them
             if (file_exists($migrationDir)) {
-                var_dump(glob($migrationDir));
                 foreach (glob($migrationDir.'/Version*.php') as $fullPath) {
                     if ($io->isVeryVerbose()) {
                         $io->write("<info>Found a candidate migration file at $fullPath</info>");
