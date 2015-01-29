@@ -1,0 +1,25 @@
+{
+    "name": "champs-libres/composer-bundle-migration",
+    "description": "Move DoctrineMigrations files from installed bundle to root package.",
+    "keywords": ["doctrine", "doctrine migrations", "symfony"],
+    "license": "AGPL-3.0",
+    "support": {
+        "email": "info@champs-libres.coop"
+    },
+    "authors": [
+        {
+            "name": "Julien Fastré",
+            "email": "julien.fastre@champs-libres.coop"
+        },
+        {
+            "name": "Champs-Libres",
+            "email": "info@champs-libres.coop"
+        }
+    ],
+    "require": {
+        "php": ">5.4"
+    },
+    "autoload": {
+        "psr-4": {"ComposerBundleMigration\\" : ""}
+    }
+}
