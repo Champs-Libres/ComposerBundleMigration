@@ -24,6 +24,8 @@ use Composer\Script\CommandEvent;
 use Symfony\Component\Filesystem\Filesystem;
 use Composer\IO\IOInterface;
 use Composer\Composer;
+use Composer\Package\PackageInterface;
+use Composer\Installer\InstallationManager;
 
 /**
  * Copy migrations files into expected dir
@@ -55,8 +57,6 @@ class Migrations
      */
     public static function synchronizeMigrations(CommandEvent $event)
     {
-        $fs = new FileSystem();
-        
         $packages = $event->getComposer()->getRepositoryManager()
               ->getLocalRepository()->getPackages();
         $installer = $event->getComposer()->getInstallationManager();
@@ -64,12 +64,36 @@ class Migrations
         $io = $event->getIO();
         
         $areFileMigrated = array();
+        
+        //migrate for root package
+        $areFileMigrated[] = self::handlePackage($event->getComposer()->getPackage(),
+              $installer, $io, $appMigrationDir);
+        
         foreach($packages as $package) {
-            //get path
-            $installPath = $installer->getInstallPath($package);
-            $installSuffix = isset($package->getExtra()['migration-source-dir']) ? 
-                  $package->getExtra()['migration-source'] : 'Resources/migrations';
-            $migrationDir = $installPath.'/'.$installSuffix;
+           $areFileMigrated[] = self::handlePackage($package, $installer, $io, 
+                 $appMigrationDir);
+        }
+        
+        if (in_array(true, $areFileMigrated)) {
+            $io->write("<warning>Some migration files have been imported. "
+                  . "You should run `php app/console doctrine:migrations:status` and/or "
+                  . "`php app/console doctrine:migrations:migrate` to apply them to your DB.");
+        }
+    }
+    
+    private static function handlePackage(
+          PackageInterface $package, 
+          InstallationManager $installer,
+          IOInterface $io,
+          $appMigrationDir
+          )
+    {
+         //get path
+            $packagePath = $installer->getInstallPath($package);
+            $installSuffix = array_key_exists('migration-source-dir', $package->getExtra()) ? 
+                  $package->getExtra()['migration-source-dir'] 
+                  : 'Resources/migrations';
+            $migrationDir = $packagePath.'/'.$installSuffix;
             
             //check for files and copy them
             if (file_exists($migrationDir)) {
@@ -78,21 +102,13 @@ class Migrations
                         $io->write("<info>Found a candidate migration file at $fullPath</info>");
                     }
                     
-                    $areFileMigrated[] = static::checkAndMoveFile($fullPath, $appMigrationDir, $io);
+                    return static::checkAndMoveFile($fullPath, $appMigrationDir, $io);
                     
                 }
             } elseif (isset($package->getExtra()['migration-source-dir'])) {
                 throw new \RuntimeException("The source migration dir '$migrationDir'"
                       . " is not found");
             }
-            
-        }
-        
-        if (in_array(true, $areFileMigrated)) {
-            $io->write("<warning>Some migration files have been imported. "
-                  . "You should run `php app/console doctrine:migrations:status` and/or "
-                  . "`php app/console doctrine:migrations:migrate` to apply them to your DB.");
-        }
     }
     
     /**
