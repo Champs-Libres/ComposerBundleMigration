@@ -100,14 +100,21 @@ class Migrations
             
             //check for files and copy them
             if (file_exists($migrationDir)) {
+                $foundFile = false; //memorize the fact that a file has been moved
+                
                 foreach (glob($migrationDir.'/Version*.php') as $fullPath) {
                     if ($io->isVeryVerbose()) {
                         $io->write("<info>Found a candidate migration file at $fullPath</info>");
                     }
                     
-                    return static::checkAndMoveFile($fullPath, $appMigrationDir, $io);
-                    
+                    $result = static::checkAndMoveFile($fullPath, $appMigrationDir, $io);
+                    // memorize if a file has been moved, but do not change if 
+                    // a file has been moved during a previous loop
+                    $foundFile = ($foundFile) ? $foundFile : $result; 
                 }
+                
+                return $foundFile;
+                
             } elseif (isset($package->getExtra()['migration-source-dir'])) {
                 throw new \RuntimeException("The source migration dir '$migrationDir'"
                       . " is not found");
