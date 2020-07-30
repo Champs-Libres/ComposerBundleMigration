@@ -2,7 +2,7 @@
 
 /*
  * Chill is a software for social workers
- * Copyright (C) 2014 Julien Fastré <julien.fastre@champs-libres.coop>
+ * Copyright (C) 2014 Champs-Libres Coopérative <info@champs-libres.coop>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -26,13 +26,13 @@ use Composer\IO\IOInterface;
 use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Composer\Installer\InstallationManager;
+use Composer\Script\Event;
 
 /**
  * Copy migrations files into expected dir
  * 
  * The script is called on composer event post-install-cmd or post-update-cmd
  *
- * @author Julien Fastré <julien.fastre@champs-libres.coop>
  */
 class Migrations
 {
@@ -55,7 +55,7 @@ class Migrations
      * @param CommandEvent $event
      * @throws \RuntimeException
      */
-    public static function synchronizeMigrations(CommandEvent $event)
+    public static function synchronizeMigrations(Event $event)
     {
         $packages = $event->getComposer()->getRepositoryManager()
               ->getLocalRepository()->getPackages();
