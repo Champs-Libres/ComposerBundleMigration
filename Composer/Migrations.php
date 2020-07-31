@@ -93,31 +93,34 @@ class Migrations
           )
     {
          //get path
-            $installSuffix = array_key_exists('migration-source-dir', $package->getExtra()) ? 
+            $installSuffixes = array_key_exists('migration-source-dir', $package->getExtra()) ? 
                   $package->getExtra()['migration-source-dir'] 
-                  : 'Resources/migrations';
-            $migrationDir = $packagePath.'/'.$installSuffix;
-            
-            //check for files and copy them
-            if (file_exists($migrationDir)) {
-                $foundFile = false; //memorize the fact that a file has been moved
+                  : ['Resources/migrations', 'migrations'];
+
+            foreach ($installSuffixes as $installSuffix) {
+                $migrationDir = $packagePath.'/'.$installSuffix;
                 
-                foreach (glob($migrationDir.'/Version*.php') as $fullPath) {
-                    if ($io->isVeryVerbose()) {
-                        $io->write("<info>Found a candidate migration file at $fullPath</info>");
+                //check for files and copy them
+                if (file_exists($migrationDir)) {
+                    $foundFile = false; //memorize the fact that a file has been moved
+                    
+                    foreach (glob($migrationDir.'/Version*.php') as $fullPath) {
+                        if ($io->isVeryVerbose()) {
+                            $io->write("<info>Found a candidate migration file at $fullPath</info>");
+                        }
+                        
+                        $result = static::checkAndMoveFile($fullPath, $appMigrationDir, $io);
+                        // memorize if a file has been moved, but do not change if 
+                        // a file has been moved during a previous loop
+                        $foundFile = ($foundFile) ? $foundFile : $result; 
                     }
                     
-                    $result = static::checkAndMoveFile($fullPath, $appMigrationDir, $io);
-                    // memorize if a file has been moved, but do not change if 
-                    // a file has been moved during a previous loop
-                    $foundFile = ($foundFile) ? $foundFile : $result; 
+                    return $foundFile;
+                    
+                } elseif (isset($package->getExtra()['migration-source-dir'])) {
+                    throw new \RuntimeException("The source migration dir '$migrationDir'"
+                          . " is not found");
                 }
-                
-                return $foundFile;
-                
-            } elseif (isset($package->getExtra()['migration-source-dir'])) {
-                throw new \RuntimeException("The source migration dir '$migrationDir'"
-                      . " is not found");
             }
     }
     
@@ -173,10 +176,11 @@ class Migrations
      */
     private static function getDestinationDir(Composer $composer)
     {
+        $projectRootPath = dirname(\Composer\Factory::getComposerFile());
         $extras = $composer->getPackage()->getExtra();
         
         return (array_key_exists('app-migrations-dir',$extras)) ?
-            $extras['app-migrations-dir'] :
-            getcwd().'/app/DoctrineMigrations';
+            $projectRootPath.'/'.$extras['app-migrations-dir'] :
+            $projectRootPath.'/migrations';
     }
 }
